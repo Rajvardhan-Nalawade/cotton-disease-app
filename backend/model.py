@@ -14,7 +14,7 @@ CLASS_NAMES = [
     'Leaf Redding', 'Leaf Variegation'
 ]
 
-# Model
+#Model
 
 class RobustEdgeDetectionModule(nn.Module):
     def __init__(self, mode='sobel'):
