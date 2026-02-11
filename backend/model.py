@@ -14,7 +14,7 @@ CLASS_NAMES = [
     'Leaf Redding', 'Leaf Variegation'
 ]
 
-# ---------------- Model ----------------
+# Model
 
 class RobustEdgeDetectionModule(nn.Module):
     def __init__(self, mode='sobel'):
@@ -88,7 +88,7 @@ class RobustAttentionGuidedEdgeViT(nn.Module):
         logits = self.classifier(combined[:, 0])
         return logits
 
-# ---------------- Load model ----------------
+#Load model
 
 def load_model(weights_path):
     model = RobustAttentionGuidedEdgeViT()
@@ -99,8 +99,7 @@ def load_model(weights_path):
 
 model = load_model("cotton_vit.pth")
 
-# ---------------- Preprocessing ----------------
-
+#Preprocessing
 transform = transforms.Compose([
     transforms.Resize((224,224)),
     transforms.ToTensor(),
@@ -108,7 +107,7 @@ transform = transforms.Compose([
                          [0.229,0.224,0.225])
 ])
 
-# ---------------- Prediction ----------------
+#Prediction
 
 def predict_image_bytes(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
