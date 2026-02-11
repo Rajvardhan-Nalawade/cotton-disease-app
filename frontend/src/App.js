@@ -11,26 +11,42 @@ function App() {
     document.documentElement.classList.toggle("dark");
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const processFile = async (file) => {
+  setPreview(URL.createObjectURL(file));
+  setLoading(true);
+  setResult("");
 
-    setPreview(URL.createObjectURL(file));
-    setLoading(true);
-    setResult("");
+  const formData = new FormData();
+  formData.append("file", file);
 
-    const formData = new FormData();
-    formData.append("file", file);
+  const res = await fetch("http://127.0.0.1:8000/predict/", {
+    method: "POST",
+    body: formData,
+  });
 
-    const res = await fetch("http://127.0.0.1:8000/predict/", {
-      method: "POST",
-      body: formData,
-    });
+  const data = await res.json();
+  setResult(`${data.class} (${(data.confidence * 100).toFixed(2)}%)`);
+  setLoading(false);
+};
 
-    const data = await res.json();
-    setResult(`${data.class} (${(data.confidence * 100).toFixed(2)}%)`);
-    setLoading(false);
-  };
+const handleUpload = (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+  processFile(file);
+};
+const handleDrop = (e) => {
+  e.preventDefault();
+  const file = e.dataTransfer.files[0];
+  if (!file) return;
+  processFile(file);
+};
+
+const handleDragOver = (e) => {
+  e.preventDefault();
+};
+
+
+
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-green-100 to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
@@ -55,24 +71,31 @@ function App() {
         </p>
 
         {/* Upload zone */}
-        <label className="cursor-pointer block border-2 border-dashed border-green-300 dark:border-gray-600 rounded-2xl p-6 hover:bg-green-50 dark:hover:bg-gray-800 transition">
+        {/* Upload zone */}
+<div
+  onDrop={handleDrop}
+  onDragOver={handleDragOver}
+  className="cursor-pointer block border-2 border-dashed border-green-300 dark:border-gray-600 rounded-2xl p-6 hover:bg-green-50 dark:hover:bg-gray-800 transition"
+>
 
-          <input type="file" hidden onChange={handleUpload} />
+  <input type="file" hidden onChange={handleUpload} />
 
-          {!preview && (
-            <p className="text-gray-500 dark:text-gray-400">
-              Click to upload image
-            </p>
-          )}
+  {!preview && (
+    <p className="text-gray-500 dark:text-gray-400">
+      Drag & drop an image here or click to upload
+    </p>
+  )}
 
-          {preview && (
-            <img
-              src={preview}
-              alt="preview"
-              className="mx-auto h-56 object-cover rounded-xl"
-            />
-          )}
-        </label>
+  {preview && (
+    <img
+      src={preview}
+      alt="preview"
+      className="mx-auto h-56 object-cover rounded-xl"
+    />
+  )}
+
+</div>
+
 
         {/* Loading */}
         {loading && (
