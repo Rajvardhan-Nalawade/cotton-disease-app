@@ -17,7 +17,7 @@ CLASS_NAMES = [
 
 MODEL_PATH = hf_hub_download(
     repo_id="Raj-Nal/cotton-vit-model",
-    filename="cotton_vit.pth"
+    filename="cotton_vit_fp16.pth"
 )
 
 #Model
