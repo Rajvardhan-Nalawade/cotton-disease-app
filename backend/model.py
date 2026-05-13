@@ -100,6 +100,7 @@ def load_model(weights_path):
     model = RobustAttentionGuidedEdgeViT()
     state_dict = torch.load(weights_path, map_location='cpu')
     model.load_state_dict(state_dict, strict=False)
+    model=model.half()
     model.eval()
     return model
 
@@ -116,7 +117,7 @@ transform = transforms.Compose([
 
 def predict_image_bytes(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    tensor = transform(img).unsqueeze(0)
+    tensor = transform(img).unsqueeze(0).half()
 
     with torch.no_grad():
         logits = model(tensor)
