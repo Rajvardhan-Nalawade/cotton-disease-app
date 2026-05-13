@@ -1,6 +1,8 @@
 import React, { useState, useRef } from "react";
 
 function App() {
+  const API_URL = process.env.REACT_APP_API_URL;
+
   const [preview, setPreview] = useState(null);
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ function App() {
   const formData = new FormData();
   formData.append("file", file);
 
-  const res = await fetch("http://127.0.0.1:8000/predict/", {
+  const res = await fetch(`${API_URL}/predict/`, {
     method: "POST",
     body: formData,
   });
