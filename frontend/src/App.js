@@ -51,7 +51,10 @@ const handleDragOver = (e) => {
 };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-green-100 to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
+    <div
+      onDrop={handleDrop}
+    onDragOver={handleDragOver} 
+    className="min-h-screen flex flex-col items-center justify-center px-6 bg-gradient-to-br from-green-100 to-green-50 dark:from-gray-900 dark:to-gray-800 transition-colors">
 
       <button
   onClick={toggleDark}
@@ -79,8 +82,6 @@ const handleDragOver = (e) => {
 
         {/* Upload zone */}
 <div
-  onDrop={handleDrop}
-  onDragOver={handleDragOver}
   className="border-2 border-dashed border-green-300 dark:border-gray-600 rounded-2xl p-6 mb-4 hover:bg-green-50 dark:hover:bg-gray-800 transition"
 >
 
