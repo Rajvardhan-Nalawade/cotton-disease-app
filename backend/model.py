@@ -7,12 +7,18 @@ import io
 import timm
 from einops import rearrange
 from einops.layers.torch import Rearrange
+from huggingface_hub import hf_hub_download
 
 CLASS_NAMES = [
     'Bacterial Blight', 'Curl Virus', 'Healthy Leaf',
     'Herbicide Growth Damage', 'Leaf Hopper Jassids',
     'Leaf Redding', 'Leaf Variegation'
 ]
+
+MODEL_PATH = hf_hub_download(
+    repo_id="Raj-Nal/cotton-vit-model",
+    filename="cotton_vit.pth"
+)
 
 #Model
 
@@ -97,8 +103,7 @@ def load_model(weights_path):
     model.eval()
     return model
 
-model = load_model("cotton_vit.pth")
-
+model = load_model(MODEL_PATH)
 #Preprocessing
 transform = transforms.Compose([
     transforms.Resize((224,224)),
