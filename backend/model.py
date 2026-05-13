@@ -17,7 +17,7 @@ CLASS_NAMES = [
 
 MODEL_PATH = hf_hub_download(
     repo_id="Raj-Nal/cotton-vit-model",
-    filename="cotton_vit_fp16.pth"
+    filename="cotton_vit_eval.pth"
 )
 
 #Model
@@ -61,7 +61,7 @@ class RobustAttentionGuidedEdgeViT(nn.Module):
     def __init__(self, num_classes=7, edge_mode='sobel', pretrained=False):
         super().__init__()
         self.edge_detector = RobustEdgeDetectionModule(mode=edge_mode)
-        self.vit = timm.create_model('vit_base_patch16_224', pretrained=pretrained)
+        self.vit = timm.create_model('deit_tiny_patch16_224', pretrained=pretrained)
         self.embed_dim = self.vit.embed_dim
         self.vit.head = nn.Identity()
 
@@ -100,7 +100,6 @@ def load_model(weights_path):
     model = RobustAttentionGuidedEdgeViT()
     state_dict = torch.load(weights_path, map_location='cpu')
     model.load_state_dict(state_dict, strict=False)
-    model=model.half()
     model.eval()
     return model
 
@@ -117,7 +116,7 @@ transform = transforms.Compose([
 
 def predict_image_bytes(image_bytes):
     img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
-    tensor = transform(img).unsqueeze(0).half()
+    tensor = transform(img).unsqueeze(0)
 
     with torch.no_grad():
         logits = model(tensor)
