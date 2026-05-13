@@ -221,7 +221,7 @@
                   </div>
 
                   <div className="flex justify-between">
-                    <span>Severity</span>
+                    <span>Risk</span>
 
                     <span className={`px-3 py-1 rounded-full text-white text-sm font-semibold ${
                       diseaseInfo[predictionData.disease].severity === "High"
