@@ -1,3 +1,29 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  min-height: 100dvh;
+  background: transparent;
+}
+
+body {
+  background: linear-gradient(
+    to bottom right,
+    #dcfce7,
+    #f0fdf4
+  );
+}
+
+html.dark body {
+  background: linear-gradient(
+    to bottom right,
+    #111827,
+    #1f2937
+  );
+}
