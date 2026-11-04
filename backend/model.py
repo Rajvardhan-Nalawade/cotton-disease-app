@@ -8,6 +8,16 @@ import timm
 from einops import rearrange
 from einops.layers.torch import Rearrange
 from huggingface_hub import hf_hub_download
+import logging
+import timm
+from PIL import Image, ImageOps
+
+
+logger = logging.getLogger("cotton")
+logging.basicConfig(level=logging.INFO)
+
+GATE_THRESHOLD = 0.3     # reject only if P(cotton) is below this
+VIT_CONF_FLOOR = 0.6     # below this, say "uncertain"
 
 CLASS_NAMES = [
     'Bacterial Blight', 'Curl Virus', 'Healthy Leaf',
@@ -19,6 +29,12 @@ MODEL_PATH = hf_hub_download(
     repo_id="Raj-Nal/cotton-vit-model",
     filename="cotton_vit_eval.pth"
 )
+
+GATE_PATH = hf_hub_download(
+    repo_id="Raj-Nal/cotton-vit-model",
+    filename="gate_v3.pt"
+)
+
 
 #Model
 
@@ -104,6 +120,16 @@ def load_model(weights_path):
     return model
 
 model = load_model(MODEL_PATH)
+
+#Load gate
+def load_gate(path):
+    m = timm.create_model("efficientnet_b0", pretrained=False, num_classes=2)
+    m.load_state_dict(torch.load(path, map_location="cpu"))
+    m.eval()
+    return m
+
+gate = load_gate(GATE_PATH)
+
 #Preprocessing
 transform = transforms.Compose([
     transforms.Resize((224,224)),
@@ -115,16 +141,28 @@ transform = transforms.Compose([
 #Prediction
 
 def predict_image_bytes(image_bytes):
-    img = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+    img = ImageOps.exif_transpose(Image.open(io.BytesIO(image_bytes))).convert("RGB")
     tensor = transform(img).unsqueeze(0)
 
     with torch.no_grad():
-        logits = model(tensor)
-        probs = F.softmax(logits, dim=1)[0]
+        p_cotton = F.softmax(gate(tensor), dim=1)[0, 0].item()
 
-    idx = torch.argmax(probs).item()
+    if p_cotton < GATE_THRESHOLD:
+        logger.info("status=rejected p_cotton=%.3f", p_cotton)
+        return {"status": "rejected", "reason": "not_cotton", "p_cotton": p_cotton}
+
+    with torch.no_grad():
+        probs = F.softmax(model(tensor), dim=1)[0]
+    idx = int(torch.argmax(probs).item())
+    conf = float(probs[idx])
+
+    status = "ok" if conf >= VIT_CONF_FLOOR else "uncertain"
+    logger.info("status=%s p_cotton=%.3f class=%s conf=%.3f",
+                status, p_cotton, CLASS_NAMES[idx], conf)
 
     return {
+        "status": status,
         "class": CLASS_NAMES[idx],
-        "confidence": float(probs[idx])
+        "confidence": conf,
+        "p_cotton": p_cotton,
     }
